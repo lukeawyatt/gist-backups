@@ -1,0 +1,17 @@
+# IGNORE TEMP FILES
+.DS_Store
+*~
+
+# WINDOWS IMAGE FILE CACHES
+Thumbs.db
+ehthumbs.db
+
+# FOLDER CONFIG FILE
+Desktop.ini
+
+# DEBUG FILES
+*.log
+
+# PROJECT SPECIFIC
+token.ini
+backups
