@@ -26,7 +26,6 @@
 # INITIALIZATION
 GITHUB_AUTH_URL="https://api.github.com/authorizations"
 GITHUB_GIST_URL=${GIST_URL:-https://api.github.com/gists}
-BACKUP_PATH="./backups"
 
 
 echo "########################################"
@@ -46,6 +45,19 @@ echo
 
 TOKEN=$(git config --get github.gist.oauth.token)
 
+BACKUP_PATH=""
+if [ -f config.ini ]; then
+    BACKUP_PATH=$(<config.ini)
+	echo "BACKUP PATH: $BACKUP_PATH"
+	echo 
+fi
+
+if [ -z "$BACKUP_PATH" ]; then
+	echo -n "Backup Path: " 
+	read BACKUP_PATH
+	echo "$BACKUP_PATH" > "./config.ini"
+fi
+
 function jsonval {
   temp=`echo $JSON | sed 's/\\\\\//\//g' | sed 's/[{}]//g' | awk -v k="text" '{n=split($0,a,","); for (i=1; i<=n; i++) print a[i]}' | sed 's/\"\:\"/\|/g' | sed 's/[\,]/ /g' | sed 's/\"//g' | grep -w $PROP`
   echo ${temp##*|}
@@ -59,7 +71,6 @@ if [ -z "$TOKEN" ]; then
   read GITHUB_USER
 
   read -s -p "GitHub Password: " GITHUB_PASSWORD
-
   
   CURL_OUTPUT=$(curl -u $GITHUB_USER:$GITHUB_PASSWORD \
     -H "Content-Type: application/json" \

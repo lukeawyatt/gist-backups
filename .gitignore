@@ -13,5 +13,5 @@ Desktop.ini
 *.log
 
 # PROJECT SPECIFIC
-token.ini
+config.ini
 backups
