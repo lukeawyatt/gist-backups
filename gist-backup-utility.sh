@@ -24,7 +24,6 @@
 ########################################
 
 # INITIALIZATION
-GITHUB_AUTH_URL="https://api.github.com/authorizations"
 GITHUB_GIST_URL=${GIST_URL:-https://api.github.com/gists}
 
 
@@ -32,13 +31,22 @@ echo "########################################"
 echo "########## GistBackupUtility ###########"
 echo "########################################"
 echo
-echo "This utility will self-authenticate and backup"
-echo "gists from GitHub.  First run will be guided."
-echo "In the instance your Personal Access Token is"
-echo "set, yet corrupt or deleted from GitHub, run"
-echo "the following command:"
+echo "This utility will iterate and backup gists"
+echo "from GitHub.  Personal Access Tokens are set"
+echo "manually now that GitHub has shut down the"
+echo "Authentication API. If your token is corrupt"
+echo "or deleted from GitHub, run the following command:"
 echo
 echo "git config --global --unset github.gist.oauth.token"
+echo
+echo "You can generate a token at https://github.com"
+echo "by navigating to:"
+echo "Settings -> Developer Settings -> Personal Access Tokens"
+echo
+echo "Once generated, run the following command while"
+echo "replacing ACCESS_TOKEN with your generated value"
+echo
+echo "git config --global github.gist.oauth.token ACCESS_TOKEN"
 echo
 echo "Lets get started..."
 echo
@@ -58,38 +66,13 @@ if [ -z "$BACKUP_PATH" ]; then
 	echo "$BACKUP_PATH" > "./config.ini"
 fi
 
-function jsonval {
-  temp=`echo $JSON | sed 's/\\\\\//\//g' | sed 's/[{}]//g' | awk -v k="text" '{n=split($0,a,","); for (i=1; i<=n; i++) print a[i]}' | sed 's/\"\:\"/\|/g' | sed 's/[\,]/ /g' | sed 's/\"//g' | grep -w $PROP`
-  echo ${temp##*|}
-}
+
+########################################
+######### GIST BACKUP PROCESS ##########
+########################################
 
 if [ -z "$TOKEN" ]; then
-  echo "Existing token not found, creating one instead..."
-  echo 
-  
-  echo -n "GitHub Username: " 
-  read GITHUB_USER
-
-  read -s -p "GitHub Password: " GITHUB_PASSWORD
-  
-  CURL_OUTPUT=$(curl -u $GITHUB_USER:$GITHUB_PASSWORD \
-    -H "Content-Type: application/json" \
-    -X POST \
-    -d '{"scopes":["gist"], "note": "GistBackupUtility"}' \
-    $GITHUB_AUTH_URL)
-
-  echo "GITHUB OUTPUT: $CURL_OUTPUT"
-  echo 
-    
-  JSON=$CURL_OUTPUT
-  PROP='token'
-  TOKEN=`jsonval`
-  TOKEN=$(echo "$TOKEN" | grep -oP "^token: \K.*")
-fi
-
-echo "TOKEN: $TOKEN"
-
-if [ -z "$TOKEN" ]; then
+  echo "No OAuth token found in github.gist.oauth.token git config."
   echo "Authorization is invalid or the Personal Access Token already exists."
   echo "Please try again. If the token exists and needs to be reset,"
   echo "log into GitHub and delete the token for the GistBackupUtility."
@@ -98,18 +81,7 @@ if [ -z "$TOKEN" ]; then
   echo 
   exit 1
 else
-  git config --global github.gist.oauth.token $TOKEN
-fi
-
-
-########################################
-######### GIST BACKUP PROCESS ##########
-########################################
-
-if [ -z $TOKEN ]
-then
-  echo "No OAuth token found in github.gist.oauth.token git config."
-  exit 1
+  echo "TOKEN: $TOKEN"
 fi
 
 if [ -z "$BACKUP_PATH" ]
