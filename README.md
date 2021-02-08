@@ -37,3 +37,8 @@ This will clone all gist repositories to a local folder, for example `./backups`
 stored in `./config.ini` for later use.  Remove this file if you'd like to change directories.
 
 When you call the script again, it will simply update the repos (pull changes) if they exist already.
+
+
+#### Usage
+
+* Dated backup folders
